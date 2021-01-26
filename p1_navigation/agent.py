@@ -20,7 +20,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, seed):
+    def __init__(self, state_size, action_size, doubleDQN, seed):
         """Initialize an Agent object.
 
         Params
@@ -31,6 +31,7 @@ class Agent():
         """
         self.state_size = state_size
         self.action_size = action_size
+        self.doubleDQN = doubleDQN
         self.seed = random.seed(seed)
 
         # Q-Network
@@ -86,7 +87,13 @@ class Agent():
         states, actions, rewards, next_states, dones = experiences
 
         # Get max predicted Q values (for next states) from target model
-        Q_targets_next = self.qnetwork_target(next_states).detach().max(1)[0].unsqueeze(1)
+        next_action_values = self.qnetwork_target(next_states).detach()
+        if self.doubleDQN:
+          next_action_values_local = self.qnetwork_local(next_states).detach()
+          max_a = torch.argmax(next_action_values_local, dim=1)
+          Q_targets_next = next_action_values.gather(1, max_a.view(-1, 1))
+        else:
+          Q_targets_next = next_action_values.max(1)[0].unsqueeze(1)
         # Compute Q targets for current states
         Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
 
