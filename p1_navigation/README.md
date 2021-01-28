@@ -24,10 +24,9 @@ The task is episodic, and in order to solve the environment, your agent must get
 
 1. Clone the repository.
 
-$ git clone https://github.com/ahgit2021/deep-reinforcement-learning.git
-$ cd deep-reinforcement-learning
-
-Make sure you are on branch 'navigation'.
+    - $ git clone https://github.com/ahgit2021/deep-reinforcement-learning.git
+    - $ cd deep-reinforcement-learning
+    - Make sure you are on branch 'navigation'.
 
 2. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
     - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P1/Banana/Banana_Linux.zip)
