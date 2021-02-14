@@ -22,7 +22,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Agent():
     """Interacts with and learns from the environment."""
     
-    def __init__(self, state_size, action_size, random_seed):
+    def __init__(self, state_size, action_size, random_seed, num_steps_update, num_updates):
         """Initialize an Agent object.
         
         Params
@@ -31,6 +31,8 @@ class Agent():
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.num_steps_update = num_steps_update
+        self.num_updates = num_updates
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
@@ -51,13 +53,14 @@ class Agent():
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
     
-    def step(self, state, action, reward, next_state, done):
+    def step(self, state, action, reward, next_state, done, curstep):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE:
+        if len(self.memory) > BATCH_SIZE and curstep % self.num_steps_update == 0:
+          for i in range(self.num_updates):
             experiences = self.memory.sample()
             self.learn(experiences, GAMMA)
 
