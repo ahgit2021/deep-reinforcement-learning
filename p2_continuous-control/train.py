@@ -48,5 +48,6 @@ def train_agent(env, num_episodes):
       curstep += 1
       if np.any(dones):                                  # exit loop if episode finished
         print('Total score (averaged over agents) episode {}: {}'.format(episode, np.mean(scores)))
+        print(" number of steps, buf size: {} {}".format(curstep, len(agent.memory)))
         break
     episode += 1 

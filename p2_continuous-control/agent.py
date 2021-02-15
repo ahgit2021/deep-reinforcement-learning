@@ -8,8 +8,9 @@ from model import Actor, Critic
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+import sys
 
-BUFFER_SIZE = int(1e4)  # replay buffer size
+BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 128        # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
@@ -56,7 +57,8 @@ class Agent():
     def step(self, state, action, reward, next_state, done, curstep):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
-        self.memory.add(state, action, reward, next_state, done)
+        for i in range(len(state)):
+          self.memory.add(state[i], action[i], reward[i], next_state[i], done[i])
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > BATCH_SIZE and curstep % self.num_steps_update == 0:
@@ -71,7 +73,7 @@ class Agent():
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy()
         self.actor_local.train()
-        if add_noise:
+        if False and add_noise:
             action += self.noise.sample()
         return np.clip(action, -1, 1)
 
