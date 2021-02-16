@@ -16,6 +16,7 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 import sys
+import collections
 
 sys.dont_write_bytecode = True
 
@@ -30,6 +31,8 @@ def train_agent(env, num_episodes):
   agent = Agent(state_size, action_size, random_seed=0, num_steps_update=20, num_updates=10)
 
   episode = 0
+  mean_scores = []
+  running_mean_scores = collections.deque(maxlen=100)
 
   while episode < num_episodes:
     states = env_info.vector_observations
@@ -47,8 +50,20 @@ def train_agent(env, num_episodes):
       states = next_states                               # roll over states to next time step
       curstep += 1
       if np.any(dones):                                  # exit loop if episode finished
-        print('Total score (averaged over agents) episode {}: {}'.format(episode, np.mean(scores)))
-        print(" number of steps, buf size, noise_scale: {} {} {}".format(curstep, len(agent.memory), agent.noise_scale))
         break
+
+    mean_score_episode = np.mean(scores)
+    mean_scores.append(mean_score_episode)
+    running_mean_scores.append(mean_score_episode)
+    running_mean = np.mean(running_mean_scores)
+
+    print('\rEpisode {}\tScore: {:.2f}\tRunning Average: {:.2f}'.format(episode, mean_score_episode, running_mean), end="")
+    if episode % 10 == 0:
+      print('Episode {}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}'.format(episode, np.mean(mean_scores[-10:]), running_mean), end="")
+    if running_mean >= 30:
+      print("solved in {} episodes!".format(episodes))
+      torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
+      torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
+      break
     episode += 1
     agent.update()
