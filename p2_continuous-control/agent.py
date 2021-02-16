@@ -76,7 +76,7 @@ class Agent():
             action = self.actor_local(state).cpu().data.numpy()
         self.actor_local.train()
         if add_noise:
-            action += np.random.normal(scale=self.noise_scale, size=len(action))
+            action += np.random.normal(scale=self.noise_scale, size=action.shape)
         return np.clip(action, -1, 1)
 
     def update(self):
