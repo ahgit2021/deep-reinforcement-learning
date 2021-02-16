@@ -17,6 +17,7 @@ TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
+NOISE_DECAY=0.99
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -37,6 +38,7 @@ class Agent():
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
+        self.noise_scale = 1.0
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(device)
@@ -73,10 +75,12 @@ class Agent():
         with torch.no_grad():
             action = self.actor_local(state).cpu().data.numpy()
         self.actor_local.train()
-        if False and add_noise:
-            action += self.noise.sample()
+        if add_noise:
+            action += np.random.normal(scale=self.noise_scale, size=len(action))
         return np.clip(action, -1, 1)
 
+    def update(self):
+        self.noise_scale *= NOISE_DECAY
 
     def reset(self):
         self.noise.reset()
