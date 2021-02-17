@@ -65,3 +65,4 @@ def train_agent(env, num_episodes):
       break
     episode += 1
     agent.update()
+  return mean_scores
