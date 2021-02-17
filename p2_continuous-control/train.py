@@ -57,11 +57,9 @@ def train_agent(env, num_episodes):
     running_mean_scores.append(mean_score_episode)
     running_mean = np.mean(running_mean_scores)
 
-    print('\rEpisode {}\tScore: {:.2f}\tRunning Average: {:.2f}'.format(episode, mean_score_episode, running_mean), end="")
-    if episode % 10 == 0:
-      print('Episode {}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}'.format(episode, np.mean(mean_scores[-10:]), running_mean), end="")
+    print('Episode {}\tScore: {:.2f}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}\n'.format(episode, np.mean(mean_scores[-10:]), mean_score_episode, running_mean), end="")
     if running_mean >= 30:
-      print("solved in {} episodes!".format(episodes))
+      print("solved in {} episodes!\n".format(episode))
       torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
       torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
       break
