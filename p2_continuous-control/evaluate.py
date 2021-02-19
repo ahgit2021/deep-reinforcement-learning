@@ -20,7 +20,7 @@ import collections
 
 sys.dont_write_bytecode = True
 
-def evaluate_agent(env):
+def evaluate_agent(env, num_episodes):
   brain_name = env.brain_names[0]
   brain = env.brains[brain_name]
   env_info = env.reset(train_mode=False)[brain_name]
@@ -33,7 +33,7 @@ def evaluate_agent(env):
   agent.actor_local.load_state_dict(torch.load('checkpoint_actor.pth'))
   mean_scores = []
 
-  for episode in range(5):
+  for episode in range(num_episodes):
     scores = np.zeros(num_agents)
     while True:
       actions = agent.act(states, add_noise=False) # select an action (for each agent)
@@ -47,6 +47,7 @@ def evaluate_agent(env):
         break
 
     mean_scores.append(np.mean(scores))
-    print('Episode {}\tScore: {:.2f}Running Average: {:.2f}\n'.format(episode, mean_scores[-1], np.mean(mean_scores)))
+    print('Episode {}\tScore: {:.2f}\tRunning Average: {:.2f}'.format(episode, mean_scores[-1], np.mean(mean_scores)))
 
-  print('Mean score over 100 episodes: {:.2f}\n'.format(np.mean(mean_scores)))
+  print('Mean score over 100 episodes: {:.2f}'.format(np.mean(mean_scores)))
+  return mean_scores

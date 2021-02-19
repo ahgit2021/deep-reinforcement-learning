@@ -30,11 +30,10 @@ def train_agent(env, num_episodes):
   state_size = states.shape[1]
   agent = Agent(state_size, action_size, random_seed=0, num_steps_update=20, num_updates=10)
 
-  episode = 0
   mean_scores = []
   running_mean_scores = collections.deque(maxlen=100)
 
-  while episode < num_episodes:
+  for episode in range(num_episodes):
     states = env_info.vector_observations
     state_size = states.shape[1]
     scores = np.zeros(num_agents) # initialize the score (for each agent)
@@ -63,6 +62,5 @@ def train_agent(env, num_episodes):
       torch.save(agent.actor_local.state_dict(), 'checkpoint_actor.pth')
       torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
       break
-    episode += 1
     agent.update()
   return mean_scores
