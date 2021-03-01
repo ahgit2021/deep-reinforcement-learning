@@ -96,15 +96,22 @@ class Agent():
             gamma (float): discount factor
         """
         states, actions, rewards, next_states, done = experiences
+        batch_size = BATCH_SIZE
+        assert states.shape == (batch_size, 2, self.state_size)
+        assert next_states.shape == (batch_size, 2, self.state_size)
+        assert actions.shape == (batch_size, 2, self.action_size)
+        assert rewards.shape == (batch_size,)
+        assert done.shape == (batch_size,)
 
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
-        actions_next = [self.actor_target[i](next_states[i]) for i in range(2)]
-        Q_targets_next = self.critic_target(next_states.reshape(-1), actions_next.reshape(-1))
+        actions_next = torch.cat((self.actor_target[i](next_states[i]) for i in range(2)), dim=1)
+        assert actions_next.shape== (batch_size, self.action_size * 2)
+        Q_targets_next = self.critic_target(next_states.reshape(batch_size, -1), actions_next)
         # Compute Q targets for current states (y_i)
         Q_targets = rewards + (gamma * Q_targets_next * (1 - done))
         # Compute critic loss
-        Q_expected = self.critic_local(states.reshape(-1), actions.reshape(-1))
+        Q_expected = self.critic_local(states.reshape(batch_size, -1), actions.reshape(batch_size, -1))
         critic_loss = F.mse_loss(Q_expected, Q_targets)
         # Minimize the loss
         self.critic_optimizer.zero_grad()
@@ -113,8 +120,9 @@ class Agent():
 
         # ---------------------------- update actor ---------------------------- #
         # Compute actor loss
-        actions_pred = [self.actor_local[i](states[i]) for i in range(2)]
-        actor_loss = -self.critic_local(states.reshape(-1), actions_pred.reshape(-1)).mean()
+        actions_pred = torch.cat((self.actor_local[i](states[i]) for i in range(2)), dim=1)
+        assert actions_pred.shape== (batch_size, self.action_size * 2)
+        actor_loss = -self.critic_local(states.reshape(batch_size, -1), actions_pred).mean()
         # Minimize the loss
         for i in range(2):
             self.actor_optimizer[i].zero_grad()
@@ -126,6 +134,7 @@ class Agent():
         self.soft_update(self.critic_local, self.critic_target, TAU)
         for i in range(2):
             self.soft_update(self.actor_local[i], self.actor_target[i], TAU)
+
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
