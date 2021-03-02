@@ -56,7 +56,9 @@ class Agent():
     def step(self, state, action, reward, next_state, done, curstep):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
-        assert len(state) == 2
+        assert state.shape == (2, self.state_size)
+        assert next_state.shape == (2, self.state_size)
+        assert action.shape == (2, self.action_size)
         assert len(done) == 2 and done[0] == done[1]
         assert len(reward) == 2
         self.memory.add(state, action, sum(reward), next_state, done[0])
@@ -105,13 +107,13 @@ class Agent():
 
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
-        actions_next = torch.cat((self.actor_target[i](next_states[i]) for i in range(2)), dim=1)
+        actions_next = torch.cat([self.actor_target[i](next_states.permute(1,0,2)[i]) for i in range(2)], dim=1)
         assert actions_next.shape== (batch_size, self.action_size * 2)
-        Q_targets_next = self.critic_target(next_states.reshape(batch_size, -1), actions_next)
+        Q_targets_next = self.critic_target(next_states.reshape(batch_size, -1), actions_next).squeeze()
         # Compute Q targets for current states (y_i)
         Q_targets = rewards + (gamma * Q_targets_next * (1 - done))
         # Compute critic loss
-        Q_expected = self.critic_local(states.reshape(batch_size, -1), actions.reshape(batch_size, -1))
+        Q_expected = self.critic_local(states.reshape(batch_size, -1), actions.reshape(batch_size, -1)).squeeze()
         critic_loss = F.mse_loss(Q_expected, Q_targets.detach())
         # Minimize the loss
         self.critic_optimizer.zero_grad()
@@ -120,7 +122,7 @@ class Agent():
 
         # ---------------------------- update actor ---------------------------- #
         # Compute actor loss
-        actions_pred = torch.cat((self.actor_local[i](states[i]) for i in range(2)), dim=1)
+        actions_pred = torch.cat([self.actor_local[i](states.permute(1,0,2)[i]) for i in range(2)], dim=1)
         assert actions_pred.shape== (batch_size, self.action_size * 2)
         actor_loss = -self.critic_local(states.reshape(batch_size, -1), actions_pred).mean()
         # Minimize the loss
@@ -172,12 +174,11 @@ class ReplayBuffer:
         """Randomly sample a batch of experiences from memory."""
         experiences = random.sample(self.memory, k=self.batch_size)
 
-        states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
-        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
-        rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
-        next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
-        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-
+        states = torch.Tensor([e.state for e in experiences if e is not None]).float().to(device)
+        actions = torch.Tensor([e.action for e in experiences if e is not None]).float().to(device)
+        rewards = torch.Tensor([e.reward for e in experiences if e is not None]).float().to(device)
+        next_states = torch.Tensor([e.next_state for e in experiences if e is not None]).float().to(device)
+        dones = torch.Tensor([np.uint8(e.done) for e in experiences if e is not None]).float().to(device)
         return (states, actions, rewards, next_states, dones)
 
     def __len__(self):
