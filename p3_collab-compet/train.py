@@ -30,8 +30,7 @@ def train_agent(env, num_episodes):
     state_size = states.shape[1]
     agent = Agent(state_size, action_size, random_seed=0, num_steps_update=20, num_updates=10)
 
-    scores = []
-    running_scores = collections.deque(maxlen=100)
+    episode_scores = []
 
     for episode in range(num_episodes):
         states = env_info.vector_observations
@@ -45,19 +44,18 @@ def train_agent(env, num_episodes):
             rewards = env_info.rewards                         # get reward (for each agent)
             dones = env_info.local_done                        # see if episode finished
             agent.step(states, actions, rewards, next_states, dones, curstep)
-            scores += env_info.rewards                         # update the score (for each agent)
+            scores += rewards                                  # update the score (for each agent)
             states = next_states                               # roll over states to next time step
             curstep += 1
             if np.any(dones):                                  # exit loop if episode finished
                 break
 
-        score_episode = np.max(scores)
-        scores.append(score_episode)
-        running_scores.append(score_episode)
-        running_mean = np.mean(running_mean_scores)
+        episode_score = np.max(scores)
+        episode_scores.append(episode_score)
+        running_mean = np.mean(episode_scores[-100:])
 
-        print('Episode {}\tScore: {:.2f}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}\n'.format(episode, score_episode, np.mean(scores[-10:]), running_mean), end="")
-        if running_mean >= .5:
+        print('Episode {}\tScore: {:.2f}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}\n'.format(episode, episode_score, np.mean(episode_scores[-10:]), running_mean), end="")
+        if running_mean >= .5 and len(episode_scores) >= 100:
             print("solved in {} episodes!\n".format(episode + 1))
             for i in range(2):
                 torch.save(agent.actor_local[i].state_dict(), 'checkpoint_actor' + str(i) + '.pth')
@@ -65,4 +63,4 @@ def train_agent(env, num_episodes):
             break
         agent.update()
 
-    return mean_scores
+    return episode_scores

@@ -112,7 +112,7 @@ class Agent():
         Q_targets = rewards + (gamma * Q_targets_next * (1 - done))
         # Compute critic loss
         Q_expected = self.critic_local(states.reshape(batch_size, -1), actions.reshape(batch_size, -1))
-        critic_loss = F.mse_loss(Q_expected, Q_targets)
+        critic_loss = F.mse_loss(Q_expected, Q_targets.detach())
         # Minimize the loss
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
