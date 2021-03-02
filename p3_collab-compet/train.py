@@ -33,6 +33,7 @@ def train_agent(env, num_episodes):
     episode_scores = []
 
     for episode in range(num_episodes):
+        env_info = env.reset(train_mode=True)[brain_name]
         states = env_info.vector_observations
         state_size = states.shape[1]
         scores = np.zeros(num_agents) # initialize the score (for each agent)
