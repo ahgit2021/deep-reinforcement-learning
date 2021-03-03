@@ -36,6 +36,7 @@ def evaluate_agent(env, num_episodes):
     episode_scores = []
 
     for episode in range(num_episodes):
+        env_info = env.reset(train_mode=False)[brain_name]
         scores = np.zeros(num_agents) # initialize the score (for each agent)
 
         while True:
