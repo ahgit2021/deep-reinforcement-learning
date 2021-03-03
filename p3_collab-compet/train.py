@@ -31,6 +31,7 @@ def train_agent(env, num_episodes):
     agent = Agent(state_size, action_size, random_seed=0, num_steps_update=20, num_updates=10)
 
     episode_scores = []
+    solved = False
 
     for episode in range(num_episodes):
         env_info = env.reset(train_mode=True)[brain_name]
@@ -61,7 +62,8 @@ def train_agent(env, num_episodes):
             for i in range(2):
                 torch.save(agent.actor_local[i].state_dict(), 'checkpoint_actor' + str(i) + '.pth')
             torch.save(agent.critic_local.state_dict(), 'checkpoint_critic.pth')
+            solved = True
             break
         agent.update()
 
-    return episode_scores
+    return solved, episode_scores
