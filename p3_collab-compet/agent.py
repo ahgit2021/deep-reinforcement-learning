@@ -61,7 +61,7 @@ class Agent():
         assert action.shape == (2, self.action_size)
         assert len(done) == 2 and done[0] == done[1]
         assert len(reward) == 2
-        self.memory.add(state, action, sum(reward), next_state, done[0])
+        self.memory.add(state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > BATCH_SIZE and curstep % self.num_steps_update == 0:
@@ -102,8 +102,8 @@ class Agent():
         assert states.shape == (batch_size, 2, self.state_size)
         assert next_states.shape == (batch_size, 2, self.state_size)
         assert actions.shape == (batch_size, 2, self.action_size)
-        assert rewards.shape == (batch_size,)
-        assert done.shape == (batch_size,)
+        assert rewards.shape == (batch_size, 2)
+        assert done.shape == (batch_size, 2)
 
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
