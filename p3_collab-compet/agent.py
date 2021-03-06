@@ -43,7 +43,7 @@ class Agent():
         # Actor Network (w/ Target Network)
         self.actor_local = [Actor(state_size, action_size, random_seed).to(device) for i in range(2)]
         self.actor_target = [Actor(state_size, action_size, random_seed).to(device) for i in range(2)]
-        self.actor_optimizer = [optim.Adam(self.actor_local[i].parameters(), lr=LR_ACTOR) for i in range(2)]
+        self.actor_optimizer = optim.Adam(list(self.actor_local[0].parameters()) + list(self.actor_local[1].parameters()), lr=LR_ACTOR)
 
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(state_size * 2, action_size * 2, random_seed).to(device)
@@ -126,11 +126,9 @@ class Agent():
         assert actions_pred.shape== (batch_size, self.action_size * 2)
         actor_loss = -self.critic_local(states.reshape(batch_size, -1), actions_pred).mean()
         # Minimize the loss
-        for i in range(2):
-            self.actor_optimizer[i].zero_grad()
+        self.actor_optimizer.zero_grad()
         actor_loss.backward()
-        for i in range(2):
-            self.actor_optimizer[i].step()
+        self.actor_optimizer.step()
 
         # ----------------------- update target networks ----------------------- #
         self.soft_update(self.critic_local, self.critic_target, TAU)
