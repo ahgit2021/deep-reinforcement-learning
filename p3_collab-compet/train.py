@@ -30,6 +30,14 @@ def train_agent(env, num_episodes):
     state_size = states.shape[1]
     agent = Agent(state_size, action_size, random_seed=0, num_steps_update=20, num_updates=10)
 
+    oracle = Agent(state_size, action_size, random_seed=0, num_steps_update=20, num_updates=10)
+
+    for i in range(2):
+        oracle.actor_local[i].load_state_dict(torch.load('checkpoint_actor_oracle' + str(i) + '.pth'))
+    oracle.critic_local.load_state_dict(torch.load('checkpoint_critic_oracle.pth'))
+
+    agent.oracle = oracle
+
     episode_scores = []
     solved = False
 
@@ -56,7 +64,7 @@ def train_agent(env, num_episodes):
         episode_scores.append(episode_score)
         running_mean = np.mean(episode_scores[-100:])
 
-        print('Episode {}\tScore: {:.2f}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}\n'.format(episode, episode_score, np.mean(episode_scores[-10:]), running_mean), end="")
+        print('Episode {}\tScore: {:.2f}\tLast 10 Scores: {:.2f}\tRunning Average: {:.2f}\tSteps: {}\n'.format(episode, episode_score, np.mean(episode_scores[-10:]), running_mean, curstep), end="")
         if running_mean >= .5 and len(episode_scores) >= 100:
             print("solved in {} episodes!\n".format(episode + 1))
             for i in range(2):
