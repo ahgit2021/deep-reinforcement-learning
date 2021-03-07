@@ -53,9 +53,6 @@ class Agent():
         # Replay memory
         self.memory = ReplayBuffer(BUFFER_SIZE, BATCH_SIZE, random_seed)
 
-        self.oracle = None
-        self.printcnt = 0
-
     def step(self, state, action, reward, next_state, done, curstep):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
@@ -132,21 +129,6 @@ class Agent():
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
-
-        if self.printcnt % 20 == 0:
-            if self.printcnt == 0:
-                self.logfile = open("value.log", "w")
-
-            Q_oracle = self.oracle.critic_local(states.reshape(batch_size, -1), actions.reshape(batch_size, -1)).squeeze()
-            self.logfile.write("cnt = {}\n".format(self.printcnt))
-            for i in range(len(Q_expected[0])):
-                self.logfile.write(" critic {}\n".format(i))
-                self.logfile.write("  expected = {}\n".format(Q_expected[0][i]))
-                self.logfile.write("  target = {}\n".format(Q_targets[0][i]))
-                self.logfile.write("  oracle = {}\n".format(Q_oracle[0][i]))
-                self.logfile.write("  reward = {}\n".format(rewards[0][i]))
-            self.logfile.flush()
-        self.printcnt += 1
 
         # ----------------------- update target networks ----------------------- #
         self.soft_update(self.critic_local, self.critic_target, TAU)
