@@ -25,7 +25,15 @@ The environment is considered solved, when the average (over 100 episodes) of th
 
 ### Getting Started
 
-1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
+1. Clone the repository.
+
+    - $ git clone https://github.com/ahgit2021/deep-reinforcement-learning.git
+
+    - $ cd deep-reinforcement-learning
+
+    - Make sure you are on branch 'collab-compet'.
+
+2. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
     - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Linux.zip)
     - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis.app.zip)
     - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Windows_x86.zip)
@@ -35,11 +43,17 @@ The environment is considered solved, when the average (over 100 episodes) of th
 
     (_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P3/Tennis/Tennis_Linux_NoVis.zip) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
 
-2. Place the file in the DRLND GitHub repository, in the `p3_collab-compet/` folder, and unzip (or decompress) the file. 
+3. Place the file in the DRLND GitHub repository, in the `p3_collab-compet/` folder, and unzip (or decompress) the file.
+
+4. Follow the instructions in https://github.com/udacity/deep-reinforcement-learning#dependencies to install the dependencies and set up the environment.
 
 ### Instructions
 
 Follow the instructions in `Tennis.ipynb` to get started with training your own agent!  
+
+To train the agent, call `train.train_agent(env, num_episodes)`, where `env` is the Unity environemnt and `num_episodes` is the maximum number of episodes to train the agent. The function saves the model weights and returns the episode scores once the mean episode score over the last 100 episodes exceeds 0.5.
+
+To evaluate the trained agent, call `evaluate.evaluate_agent(env, num_episodes)`. This function returns the episode scores over `num_episodes` episodes.
 
 ### (Optional) Challenge: Crawler Environment
 
